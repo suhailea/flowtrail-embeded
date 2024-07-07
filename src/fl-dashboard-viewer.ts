@@ -1,7 +1,7 @@
 import { LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import apiClient from "./api-client";
-import { ReportEmbedViewer } from "./report-embed-viewer";
+import { ReportEmbedViewer } from "./fl-report-embed-viewer";
 
 /**
  * An example element.
@@ -9,7 +9,7 @@ import { ReportEmbedViewer } from "./report-embed-viewer";
  * @slot - This element has a slot
  * @csspart button - The button
  */
-@customElement("dashboard-viewer")
+@customElement("fl-dashboard-viewer")
 export class DashboardViewer extends LitElement {
   @property({ type: String })
   reportId: string = "";
@@ -53,7 +53,7 @@ export class DashboardViewer extends LitElement {
       ...report.schema,
 
       // Asssigne every props except the reportSchema
-      ...Object.keys(report).reduce((acc, key) => {
+      ...Object.keys(report).reduce((acc: any, key) => {
         if (key !== "schema") acc[key] = report[key];
         return acc;
       }, {}),
@@ -74,7 +74,7 @@ export class DashboardViewer extends LitElement {
     this.root = this.attachShadow({ mode: "open" });
 
     // Get report from the server
-    if (!this.widgets.length) await this.getReport();
+    if (!this.report) await this.getReport();
     // Render the element
     this.render();
   }
@@ -102,7 +102,7 @@ export class DashboardViewer extends LitElement {
     const widgts = this.report.widgets || [];
     widgts.forEach((report: any) => {
       const el = document.createElement(
-        "report-embed-viewer"
+        "fl-report-embed-viewer"
       ) as ReportEmbedViewer;
       el.setAttribute("reportId", report.reportId);
       this.rootEl.appendChild(el);

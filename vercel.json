@@ -1,0 +1,22 @@
+{
+  "builds": [
+      {
+          "src": "dist/my-component-library.umd.js",
+          "use": "@vercel/static"
+      },
+      {
+        "src": "vercel-home.html",
+        "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+      {
+          "src": "/flowtrail-client.js",
+          "dest": "dist/my-component-library.umd.js"
+      },
+      {
+        "src": "/(.*)",
+        "dest": "vercel-home.html"
+    }
+  ]
+}

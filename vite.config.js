@@ -16,5 +16,8 @@ export default defineConfig({
       fileName: (format) => `my-component-library.${format}.js`,
       formats: ["es", "umd"],
     },
+    rollupOptions: {
+      external: ["/^lit/"]
+    }
   },
 });

@@ -1,11 +1,15 @@
 {
   "name": "@suhailea/client",
   "private": false,
-  "version": "0.0.1",
+  "version": "0.0.14",
   "type": "module",
   "main": "dist/my-component-library.es.js",
   "exports": {
-    ".": "./dist/my-component-library.es.js"
+    ".":{
+      "import": "./dist/my-component-library.es.js",
+      "require": "./dist/my-component-library.umd.js",
+      "types": "./dist/my-component-library.d.ts"
+    }
   },
   "module": "report-viewer.ts",
   "author": {

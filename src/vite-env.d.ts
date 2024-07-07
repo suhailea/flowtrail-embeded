@@ -1,19 +1,40 @@
 /// <reference types="vite/client" />
-
+export {};
 declare global {
+  interface Window {
+    flowtrailai: {
+      init: (config: ReportConfig) => Promise<void>;
+    };
+  }
+
   interface HTMLElementTagNameMap {
-    "report-viewer": ReportViewer;
+    "fl-report-viewer": ReportViewer;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "report-embed-viewer": ReportEmbedViewer;
+    "fl-report-embed-viewer": ReportEmbedViewer;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "dashboard-viewer": DashboardViewer;
+    "fl-dashboard-viewer": DashboardViewer;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "fl-report-properties": ReportProperties;
+  }
+}
+
+// Extend winodw object with flowtrailai object
+declare global {
+  interface Window {
+    flowtrailai: {
+      init: (authParams: any) => void;
+    };
   }
 }

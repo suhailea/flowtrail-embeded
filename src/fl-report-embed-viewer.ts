@@ -2,6 +2,7 @@ import { LitElement, css, html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import Chart from "chart.js/auto";
 import apiClient from "./api-client";
+import "./report-properties";
 
 /**
  * An example element.
@@ -9,7 +10,7 @@ import apiClient from "./api-client";
  * @slot - This element has a slot
  * @csspart button - The button
  */
-@customElement("report-embed-viewer")
+@customElement("fl-report-embed-viewer")
 export class ReportEmbedViewer extends LitElement {
   @property({ type: String })
   reportId: string = "";
@@ -50,6 +51,8 @@ export class ReportEmbedViewer extends LitElement {
   @property()
   dataSources: any[] = [];
 
+  paramValues: any = {};
+
   /**
    * Build the chart based on config
    */
@@ -64,9 +67,6 @@ export class ReportEmbedViewer extends LitElement {
       this.report.reportType === "template"
     )
       return;
-
-    // If no data source found then return
-    // if (!dataSources || !dataSources.length) return;
 
     // Common chart options
     let options: any = {};
@@ -100,7 +100,7 @@ export class ReportEmbedViewer extends LitElement {
 
     // Iterate over each y axis config and build the datasets
     // for the chart js config
-    const datasets = this.report.yAxis.map((axis) => {
+    const datasets = this.report.yAxis.map((axis: any) => {
       // Extract data
       const dt = this.extractData(axis.field);
       return {
@@ -114,7 +114,12 @@ export class ReportEmbedViewer extends LitElement {
     });
 
     // Create a new chart instance
-    this.chart = new Chart(this.chartEl, {
+    const canvasId = `chart-${this.reportId}`;
+    const canvasElement = this.renderRoot.querySelector(
+      `#${canvasId}`
+    ) as HTMLCanvasElement;
+
+    this.chart = new Chart(canvasElement, {
       options: {
         ...options,
         responsive: true,
@@ -130,7 +135,7 @@ export class ReportEmbedViewer extends LitElement {
    * @param type - Report type
    * @returns - Chart js type
    */
-  getChartType(type) {
+  getChartType(type: any) {
     switch (type) {
       case "area":
       case "multi-axis-line":
@@ -147,7 +152,7 @@ export class ReportEmbedViewer extends LitElement {
    * @param field
    * @returns - Array of data
    */
-  extractData(field) {
+  extractData(field: any) {
     const data = this.report.data || {};
     if (!data || !field?.dataSourceId) return [];
 
@@ -165,16 +170,14 @@ export class ReportEmbedViewer extends LitElement {
    * make a request to the server to resolve those queries and
    * return the data.
    */
-  async resolveDataSources() {
+  async resolveDataSources(paramValues: any = {}) {
     this.loading = true;
     // Make a request to the server to resolve the queries
     // const params = { ids: report.dataSources.map((e) => e.id) };
-    console.log(this.report.dataSources, "data sources");
-
     const params = {
-      ids: this.report.dataSources?.map((e) => e.id),
+      ids: this.report.dataSources?.map((e: any) => e.id),
       multiple: true,
-      paramValues: {},
+      params: paramValues,
     };
     this.report.data = await apiClient.post("/datasource/exec", params);
     this.loading = false;
@@ -186,10 +189,6 @@ export class ReportEmbedViewer extends LitElement {
    */
   async getReport() {
     const reportId = this.reportId;
-    console.log("report id", reportId);
-
-    console.log(reportId, "report id");
-
     if (!reportId) return;
 
     // Get the report from the server
@@ -206,7 +205,7 @@ export class ReportEmbedViewer extends LitElement {
       ...report.schema,
 
       // Asssigne every props except the reportSchema
-      ...Object.keys(report).reduce((acc, key) => {
+      ...Object.keys(report).reduce((acc: any, key) => {
         if (key !== "schema") acc[key] = report[key];
         return acc;
       }, {}),
@@ -222,29 +221,16 @@ export class ReportEmbedViewer extends LitElement {
    * script.
    */
   async connectedCallback() {
-    // Define root shadow element
-    this.root = this.attachShadow({ mode: "open" });
+    super.connectedCallback();
 
     // Get report from the server
     await this.getReport();
 
-    // Render the element
-    this.render();
-
     // Resolve data sources
     await this.resolveDataSources();
 
-    // Apply styles
-    this.applyStyles();
-
     // Build the chart
     this.buildChart();
-
-    // Build table
-    this.buildTable();
-
-    // Build template based report
-    this.buildTemplate();
   }
 
   buildTemplate() {
@@ -269,123 +255,144 @@ export class ReportEmbedViewer extends LitElement {
     const dsId = this.dataSources[0]?.id;
     if (!dsId) return;
     const data = dataset[dsId] || [];
-
-    const header = document.createElement("div");
-    header.classList.add("flex", "table-header");
-    header.style.fontWeight = "bold";
-    columns.forEach((col) => {
-      const colEl = document.createElement("div");
-      colEl.classList.add("flex-1", "text-center");
-      colEl.innerText = col.title;
-
-      colEl.style.width = `${col.width}px`;
-
-      header.appendChild(colEl);
-    });
-
-    // Render table body
-    const body = document.createElement("div");
-    body.classList.add("flex", "flex-col", "table-body");
-
-    // Get rows from report config
-    data.forEach((row) => {
-      const rowEl = document.createElement("div");
-      rowEl.classList.add("flex", "table-row");
-      columns.forEach((col) => {
-        const colEl = document.createElement("div");
-        colEl.classList.add("flex-1", "text-center");
-        colEl.innerText = row[col.field.field];
-        colEl.style.width = `${col.width}px`;
-        rowEl.appendChild(colEl);
-      });
-      body.appendChild(rowEl);
-    });
-
-    this.rootEl?.appendChild(header);
-    this.rootEl?.appendChild(body);
+    return html`
+      <div class="flex table-header" style="font-weight: bold;">
+        ${columns.map(
+          (col: any) => html`
+            <div class="flex-1 text-center" style="width: ${col.width}px;">
+              ${col.title}
+            </div>
+          `
+        )}
+      </div>
+      <div class="flex flex-col table-body">
+        ${data.map(
+          (row: any) => html`
+            <div class="flex table-row">
+              ${columns.map(
+                (col: any) => html`
+                  <div
+                    class="flex-1 text-center"
+                    style="width: ${col.width}px;"
+                  >
+                    ${row[col.field.field]}
+                  </div>
+                `
+              )}
+            </div>
+          `
+        )}
+      </div>
+    `;
   }
 
-  applyStyles() {
-    this.rootEl.style.display = "block";
-    this.rootEl.style.width = `${this.report.width}px` || "100%";
-    this.rootEl.style.height = `${this.report.height}px` || "100%";
+  async handleValueChange(e: CustomEvent, param: any) {
+    const value = e.detail.value;
+    // console.log(this.report, value);
+
+    // Get the parameters from the report
+    const params = this.report?.parameters || [];
+
+    // Now we need to prepare the param values
+    // based on the parameters in the report
+    const paramValues = params.reduce((acc: any, p: any) => {
+      if (p.name === param.name) acc[p.name] = value[p.name];
+      return acc;
+    }, {});
+
+    // Set the param values
+    this.paramValues = {
+      ...this.paramValues,
+      ...paramValues,
+    };
+
+    console.log(this.paramValues, "paramValues");
+
+    // Execute the query
+    await this.resolveDataSources(this.paramValues);
+
+    // Build the chart
+    this.buildChart();
   }
 
   render() {
-    if (!this.root) return;
-    console.log("rendering");
-
-    // Make sure the shadow root html is cleared
-    this.root.innerHTML = "";
-
-    // Add style to the shadow root
-    const style = document.createElement("style");
-    style.innerHTML = `
-    	.fl-report-viewer {
-    		width: 100%;
-    		height: 100%;
-    	}
-
-    	.chart {
-    		width: 100%;
-    		height: 100%;
-    	}
-
-    	.flex {
-    		display: flex;
-
-    	}
-
-    	.table-header {
-    		flex-direction: row;
-    	}
-
-    	.table-header>div {
-    		border: solid 1px #eee;
-    		padding: 5px;
-    	}
-
-    	.table-body {
-    		flex-direction: column;
-    		overflow-y: auto;
-    		height: 100%;
-    	}
-
-    	.table-row  {
-    		flex-direction: row;
-    	}
-
-    	.table-row > div {
-
-    		border: solid 1px #eee;
-    		padding: 5px;
-
-    	}
+    // Create a canvas id based on the report id to attach the chart
+    // to the canvas
+    const id = `chart-${this.reportId}`;
+    return html`
+      <h1>${this.report?.name}</h1>
+      ${this.report?.parameters?.map((param: any) => {
+        // Parse the param as JSON
+        // param = JSON.parse(param);
+        console.log(typeof param, "param");
+        
+        return html`<fl-report-properties
+          parameters=${JSON.stringify(param)}
+          type=${param.type}
+          defaultValue=${param.defaultValue}
+          @value-changed=${(e: CustomEvent) => this.handleValueChange(e, param)}
+        ></fl-report-properties>`;
+      })}
+      <div class="fl-report-viewer">
+        ${this.report?.reportType !== "table"
+          ? html`
+              <canvas
+                id=${id}
+                class="chart"
+                style="width: ${this.report?.width}px; height: ${this.report
+                  ?.height}px;"
+              ></canvas>
+            `
+          : this.buildTable()}
+      </div>
     `;
-    this.root.appendChild(style);
-    this.rootEl.classList.add("fl-report-viewer");
+  }
 
-    if (this.report.reportType !== "table") {
-      // Render the element
-      this.chartEl.classList.add("chart", "w-full", "h-full");
-      this.rootEl.appendChild(this.chartEl);
+  static styles = css`
+    .fl-report-viewer {
+      display: flex;
+      justify-content: left;
+      align-items: center;
+      flex-wrap: wrap;
     }
 
-    // Render the element
-    this.root.appendChild(this.rootEl);
+    .chart {
+      width: 100%;
+      height: 100%;
+    }
 
-    // Render the element
-    return html`
-            <div class="fl-report-viewer">
-              <div class="chart w-full h-full" />
-            </div>
-        </html>
-      `;
-  }
+    .flex {
+      display: flex;
+    }
+
+    .table-header {
+      flex-direction: row;
+    }
+
+    .table-header > div {
+      border: solid 1px #eee;
+      padding: 5px;
+    }
+
+    .table-body {
+      flex-direction: column;
+      overflow-y: auto;
+      height: 100%;
+    }
+
+    .table-row {
+      flex-direction: row;
+    }
+
+    .table-row > div {
+      border: solid 1px #eee;
+      padding: 5px;
+    }
+  `;
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "report-embed-viewer": ReportEmbedViewer;
+    "fl-report-embed-viewer": ReportEmbedViewer;
   }
 }

@@ -1,8 +1,8 @@
 import { LitElement, css, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import apiClient from "./api-client";
-import "./report-embed-viewer";
-import "./dashboard-viewer";
+import "./fl-report-embed-viewer";
+import "./fl-dashboard-viewer";
 
 /**
  * An example element.
@@ -10,18 +10,8 @@ import "./dashboard-viewer";
  * @slot - This element has a slot
  * @csspart button - The button
  */
-@customElement("report-viewer")
+@customElement("fl-report-viewer")
 export class ReportViewer extends LitElement {
-  /**
-   * Shadow root element of the custom element.
-   */
-  root: ShadowRoot | null = null;
-
-  /**
-   * Root element of the custom element.
-   */
-  rootEl: HTMLDivElement = document.createElement("div");
-
   /**
    * Shadow root element of the custom element.
    */
@@ -44,10 +34,10 @@ export class ReportViewer extends LitElement {
         <div class="fl-report-viewer">
           <h1>${this.data?.id || ""}</h1>
           <p>${this.data?.description}</p>
-          <dashboard-viewer
+          <fl-dashboard-viewer
             .reportId=${dashboardId}
             .report=${this.data}
-          ></dashboard-viewer>
+          ></fl-dashboard-viewer>
         </div>
       `;
     } else if (this.type === "report") {
@@ -56,7 +46,9 @@ export class ReportViewer extends LitElement {
         <div class="card">
           <h1>${this.data?.id || ""}</h1>
           <p>${this.data?.description}</p>
-          <report-embed-viewer .reportId=${reportId}></report-embed-viewer>
+          <fl-report-embed-viewer
+            .reportId=${reportId}
+          ></fl-report-embed-viewer>
         </div>
       `;
     }
@@ -70,6 +62,9 @@ export class ReportViewer extends LitElement {
   async connectedCallback() {
     super.connectedCallback();
     await this.getData();
+
+    // Render the component
+    this.render();
   }
 
   async getData() {
