@@ -15,18 +15,6 @@ export class ReportEmbedViewer extends LitElement {
   @property({ type: String })
   reportId: string = "";
 
-  root: ShadowRoot | null = null;
-
-  /**
-   * Root element of the custom element.
-   */
-  rootEl: HTMLDivElement = document.createElement("div");
-  /**
-   * DOM element to attach the chart. This should be
-   * canvas object
-   */
-  chartEl: HTMLCanvasElement = document.createElement("canvas");
-
   /**
    * Is loading. The element is requesting for data and schema from server
    */
@@ -320,47 +308,34 @@ export class ReportEmbedViewer extends LitElement {
     // to the canvas
     const id = `chart-${this.reportId}`;
     return html`
-      <h1>${this.report?.name}</h1>
-      ${this.report?.parameters?.map((param: any) => {
-        // Parse the param as JSON
-        // param = JSON.parse(param);
-        console.log(typeof param, "param");
-        
-        return html`<fl-report-properties
-          parameters=${JSON.stringify(param)}
-          type=${param.type}
-          defaultValue=${param.defaultValue}
-          @value-changed=${(e: CustomEvent) => this.handleValueChange(e, param)}
-        ></fl-report-properties>`;
-      })}
-      <div class="fl-report-viewer">
-        ${this.report?.reportType !== "table"
-          ? html`
-              <canvas
-                id=${id}
-                class="chart"
-                style="width: ${this.report?.width}px; height: ${this.report
-                  ?.height}px;"
-              ></canvas>
-            `
-          : this.buildTable()}
+      <div
+        style="padding: 10px; background: white;margin: 10px; height: 100%;
+      width: 100%;"
+      >
+        <h3 class="flex">${this.report?.name}</h3>
+        <div class="flex items-center justify-center">
+          ${this.report?.parameters?.map((param: any) => {
+            return html`<div style="margin-left: 10px">
+              <fl-report-properties
+                parameters=${JSON.stringify(param)}
+                type=${param.type}
+                defaultValue=${param.defaultValue}
+                @value-changed=${(e: CustomEvent) =>
+                  this.handleValueChange(e, param)}
+              ></fl-report-properties>
+            </div>`;
+          })}
+        </div>
+        <div>
+          ${this.report?.reportType !== "table"
+            ? html` <canvas id=${id}></canvas> `
+            : this.buildTable()}
+        </div>
       </div>
     `;
   }
 
   static styles = css`
-    .fl-report-viewer {
-      display: flex;
-      justify-content: left;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .chart {
-      width: 100%;
-      height: 100%;
-    }
-
     .flex {
       display: flex;
     }

@@ -1,7 +1,7 @@
-import { LitElement } from "lit";
+import { html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import apiClient from "./api-client";
-import { ReportEmbedViewer } from "./fl-report-embed-viewer";
+import "./fl-report-embed-viewer";
 
 /**
  * An example element.
@@ -16,15 +16,6 @@ export class DashboardViewer extends LitElement {
 
   @property()
   widgets: any[] = [];
-  /**
-   * Shadow root element of the custom element.
-   */
-  root: ShadowRoot | null = null;
-
-  /**
-   * Root element of the custom element.
-   */
-  rootEl: HTMLDivElement = document.createElement("div");
 
   /**
    * Report schema. The schema is the definition of the report.
@@ -68,48 +59,32 @@ export class DashboardViewer extends LitElement {
    * script.
    */
   async connectedCallback() {
-    console.log("HERE");
-
-    // Define root shadow element
-    this.root = this.attachShadow({ mode: "open" });
-
+    super.connectedCallback();
     // Get report from the server
     if (!this.report) await this.getReport();
     // Render the element
     this.render();
   }
   render() {
-    if (!this.root) return;
-
-    // Make sure the shadow root html is cleared
-    this.root.innerHTML = "";
-
-    // Add style to the shadow root
-    const style = document.createElement("style");
-    style.innerHTML = `
-    .fl-report-viewer {
-    		width: 100%;
-    		height: 100%;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-    	}
-    `;
-    this.root.appendChild(style);
-    this.rootEl.classList.add("fl-report-viewer");
-
     // Get schema from the report
     const widgts = this.report.widgets || [];
-    widgts.forEach((report: any) => {
-      const el = document.createElement(
-        "fl-report-embed-viewer"
-      ) as ReportEmbedViewer;
-      el.setAttribute("reportId", report.reportId);
-      this.rootEl.appendChild(el);
-    });
+    console.log(widgts, "WIDGETS");
 
-    // Render the element
-    this.root.appendChild(this.rootEl);
+    return html`
+      <div style="display: flex; flex-wrap: wrap">
+        ${widgts.map((widget: any) => {
+          return html`
+            <div
+              style="width: ${widget.width}px; height: ${widget.height}px;margin: 15px"
+            >
+              <fl-report-embed-viewer
+                .reportId=${widget.reportId}
+              ></fl-report-embed-viewer>
+            </div>
+          `;
+        })}
+      </div>
+    `;
   }
 }
 

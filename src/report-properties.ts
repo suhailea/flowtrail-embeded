@@ -39,15 +39,20 @@ export class ReportProperties extends LitElement {
 
     switch (this.type) {
       case "date":
-        return html`<div>
-          <input type="date" value=${this.value} @change=${this.handleChange} />
+        return html`<div style="border: 1px solid">
+          <label>${param.name}</label>
+          <input type="date" value=${this.value} @change=${this.handleChange} style="border: none"/>
         </div>`;
       case "multiselect":
         return html` <select
-          multiple
           @change=${this.handleChange}
           .value=${this.value}
-        ></select>`;
+          multiple
+        >
+          ${param.selectValues.split(",").map((value: string) => {
+            return html`<option value=${value}>${value}</option>`;
+          })}
+        </select>`;
       case "select":
         return html` <select @change=${this.handleChange} .value=${this.value}>
           ${param.selectValues.split(",").map((value: string) => {
