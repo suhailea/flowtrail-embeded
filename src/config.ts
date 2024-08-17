@@ -10,15 +10,15 @@ export interface ReportConfig {
 
 export function setConfig(config: ReportConfig) {
   apiKey =
-    "flowtrail_api_v1.ca3841fb658b28dd7e4fc3e5177b6f66f50ac753b424d24b6c2284c5ffeaf671427caf3c33f8109a62b56a2e72e56ee2";
-  baseUrl = "https://dev.flowtrail.ai/api";
+    "flowtrail_api_v1.551ad9f7ee36add6532f980b1f7a922bbb5e5c5b638fd57a809e9ecaf26c65ce409116fb84175d03ff226e4f52be466e";
+  baseUrl = "https://localhost:5173/api";
   authToken = config.apiKey;
 }
 
 export function getConfig(): ReportConfig {
   apiKey =
-    "flowtrail_api_v1.ca3841fb658b28dd7e4fc3e5177b6f66f50ac753b424d24b6c2284c5ffeaf671427caf3c33f8109a62b56a2e72e56ee2";
-  baseUrl = "https://dev.flowtrail.ai/api";
+    "flowtrail_api_v1.551ad9f7ee36add6532f980b1f7a922bbb5e5c5b638fd57a809e9ecaf26c65ce409116fb84175d03ff226e4f52be466e";
+  baseUrl = "https://localhost:5173/api";
   authToken = apiKey
   return { apiKey, baseUrl, authToken };
 }

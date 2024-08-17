@@ -1,7 +1,7 @@
 {
-  "name": "@suhailea/client",
+  "name": "@flowtrailai/client",
   "private": false,
-  "version": "0.0.14",
+  "version": "0.0.3",
   "type": "module",
   "main": "dist/my-component-library.es.js",
   "exports": {

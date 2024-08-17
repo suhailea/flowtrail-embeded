@@ -10,7 +10,7 @@ import "./fl-dashboard-viewer";
  * @slot - This element has a slot
  * @csspart button - The button
  */
-@customElement("fl-report-viewer")
+// @customElement("fl-report-viewer")
 export class ReportViewer extends LitElement {
   /**
    * Shadow root element of the custom element.
